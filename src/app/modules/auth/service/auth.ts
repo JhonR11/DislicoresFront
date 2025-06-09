@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, from, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { baseURL } from '../../../shared/constans';
 
 interface LoginResponse {
   error: LoginResponse;
@@ -12,7 +13,8 @@ interface LoginResponse {
   providedIn: 'root',
 })
 export class Auth {
-  private apiURL = 'http://localhost:8007/auth/login';
+
+  private apiURL = baseURL.concat("auth");
 
   constructor(private router:Router) {}
 

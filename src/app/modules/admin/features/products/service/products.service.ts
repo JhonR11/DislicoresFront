@@ -11,16 +11,17 @@ import {
 import { CreateProduct } from '../../../../../shared/models/create-products.model';
 import { Product } from '../../../../../shared/models/products';
 import { CrudProductsService } from './products.interface.service';
+import { baseURL } from '../../../../../shared/constans';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProductsService implements CrudProductsService<Product> {
-  apiURL: string;
+  apiURL:string;
   token: string | null;
   private subscription = new Subscription();
   constructor(private Http: HttpClient) {
-    this.apiURL = 'backdislicores-production.up.railway.app';
+    this.apiURL = baseURL.concat("products");
     this.token = localStorage.getItem('accessToken');
   }
 
