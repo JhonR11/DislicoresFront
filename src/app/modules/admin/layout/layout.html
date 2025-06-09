@@ -1,0 +1,15 @@
+<div class="min-h-screen bg-gray-300 flex">
+  <!-- Sidebar-->
+  <app-sidebar class="w-80 fixed h-full z-10"></app-sidebar>
+
+  <div class="flex-1 xl:ml-80 p-4">
+    <!-- Header -->
+    <nav class="w-full bg-transparent text-white shadow-none rounded-xl transition-all py-1">
+      <app-header></app-header>
+    </nav>
+
+    <div class="mt-6 bg-gray-700 rounded-xl shadow p-6 min-h-[80vh]">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

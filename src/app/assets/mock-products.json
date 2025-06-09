@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Producto 1",
+    "description": "Descripción del producto 1",
+    "images": [],
+    "category": "Bebidas",
+    "presentations": ["Grande", "Pequeña"],
+    "dimensions": {
+      "height": 10,
+      "width": 5
+    },
+    "volume": {
+      "large": 1000,
+      "small": 500,
+      "single": null
+    },
+    "price": 15.99,
+    "stock": 50
+  },
+  {
+    "name": "Producto 2",
+    "description": "Descripción del producto 2",
+    "images": [],
+    "category": "Snacks",
+    "presentations": ["Única"],
+    "dimensions": {
+      "height": 12,
+      "width": 6
+    },
+    "volume": {
+      "large": null,
+      "small": null,
+      "single": 750
+    },
+    "price": 7.5,
+    "stock": 120
+  }
+]
