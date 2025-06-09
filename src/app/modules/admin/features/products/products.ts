@@ -59,7 +59,6 @@ export default class ProductComponent implements OnInit {
 
   ngOnInit() {
     this.getAllProducts();
-    console.log(' modalview al iniciar: ', this.modalView);
   }
 
   getActivePresentation(product: Product) {
@@ -153,7 +152,6 @@ export default class ProductComponent implements OnInit {
     this.modalView = false;
     this.selectedProduct = null;
     this.editStock = null;
-    console.log('cerrar ', this.modalView);
   }
 
   closeModalEdit() {
@@ -314,7 +312,6 @@ export default class ProductComponent implements OnInit {
   viewProduct(product: Product) {
     this.modalView = true;
     this.selectedProduct = this.products[0];
-    console.log('cuando se abre la card: ', this.selectedProduct);
   }
 
   editProduct(product: Product) {
@@ -328,12 +325,10 @@ export default class ProductComponent implements OnInit {
       console.error('El producto no tiene un _id definido.');
       return;
     }
-    console.log(product._id);
     showDeleteModal(product.name, () => {
       this.subscription.add(
       this.productsService.deleteProduct(product._id!).subscribe({
         next: (data) => {
-          console.log("aqui",data)
           let resultado = data.statusCode
           this.cdRef.detectChanges();
           if(resultado==200){

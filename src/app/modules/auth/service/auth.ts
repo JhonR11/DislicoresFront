@@ -19,9 +19,8 @@ export class Auth {
   constructor(private router:Router) {}
 
   login(email: string, password: string): Observable<LoginResponse> {
-    console.log('Intentando iniciar sesión con:', { email, password });
     return from(
-      fetch(this.apiURL, {
+      fetch(this.apiURL.concat("/login"), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -30,7 +29,6 @@ export class Auth {
         body: JSON.stringify({ email, password }),
       }).then(async (response) => {
         const data = await response.json();
-        console.log('Respuesta del servidor:', data);
 
         if (!response.ok) {
           throw new Error(data.message || 'Credenciales inválidas');

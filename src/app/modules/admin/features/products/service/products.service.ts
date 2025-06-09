@@ -37,7 +37,7 @@ export class ProductsService implements CrudProductsService<Product> {
       this.subscription.add(
         x.subscribe({
           next: (data) => {
-            console.log(data.message);
+    
           },
         })
       );
@@ -105,7 +105,6 @@ export class ProductsService implements CrudProductsService<Product> {
       Accept: '*/*',
       Authorization: 'Bearer '.concat(this.token!),
     };
-    console.log(headers);
     const body = {};
     return this.Http.patch<any>(`${this.apiURL}/delete/${id}`, body, {
       headers,
