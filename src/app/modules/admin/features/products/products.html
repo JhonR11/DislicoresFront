@@ -26,7 +26,7 @@
         <th class="px-4 py-2 text-center">Opciones</th>
       </tr>
     </thead>
-    <tbody tbody *ngIf="products!==undefined && products.length>0">
+    <tbody>
       <tr
        *ngFor="let product of products"
        class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 shadow rounded">
@@ -403,6 +403,7 @@
       <input
         id="stockInput"
         type="number"
+        min="1"
         [(ngModel)]="editStock"
         min="0"
         class="w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"

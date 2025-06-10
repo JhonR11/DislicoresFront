@@ -69,7 +69,7 @@ export default class Login {
     setTimeout(() => {
       this.error = '';
       this.success = '';
-    }, 4000);
+    }, 2000);
   }
 
   validateEmail(email: string): boolean {

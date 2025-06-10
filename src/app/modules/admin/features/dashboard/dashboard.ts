@@ -91,7 +91,7 @@ export default class Dashboard implements OnInit, OnDestroy {
       categories: categoryNames,
       labels: {
         style: {
-          colors: '#111827', // texto oscuro
+          colors: '#e8d0cf', // texto oscuro
           fontSize: '14px',
         }
       },
@@ -101,7 +101,7 @@ export default class Dashboard implements OnInit, OnDestroy {
     yaxis: {
       labels: {
         style: {
-          colors: '#111827',
+          colors: '#e8d0cf',
           fontSize: '14px',
         }
       }
@@ -112,7 +112,7 @@ export default class Dashboard implements OnInit, OnDestroy {
       style: {
         fontSize: '18px',
         fontWeight: 'bold',
-        color: '#111827',
+        color: '#e8d0cf',
       },
     },
     grid: {
@@ -150,18 +150,18 @@ private renderInventoryDistributionChart() {
       style: {
         fontSize: '19px',
         fontWeight: 'bold',
-        color: '#111827',
+        color: '#e8d0cf',
       },
     },
     legend: {
       position: 'bottom',
       labels: {
-        colors: '#111827',
+        colors: '#e8d0cf',
       }
     },
     dataLabels: {
       style: {
-        colors: ['#111827']
+        colors: ['#e8d0cf']
       }
     },
   };

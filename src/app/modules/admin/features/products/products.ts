@@ -31,11 +31,6 @@ export default class ProductComponent implements OnInit {
     checked: true,
   };
 
-  // Paginación
-  currentPage = 1;
-  itemsPerPage = 5;
-
-  // Valor total inventario
   totalInventoryValue = 0;
 
   form = {
@@ -68,30 +63,6 @@ export default class ProductComponent implements OnInit {
     this.getAllProducts();
   }
 
-  // Paginación
-  get pagedProducts() {
-    if (!this.products) return [];
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    return this.products.slice(startIndex, startIndex + this.itemsPerPage);
-  }
-
-  get totalPages() {
-    return Math.ceil((this.products?.length || 0) / this.itemsPerPage);
-  }
-
-  goToPage(page: number) {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
-    }
-  }
-
-  nextPage() {
-    this.goToPage(this.currentPage + 1);
-  }
-
-  prevPage() {
-    this.goToPage(this.currentPage - 1);
-  }
 
   getActivePresentation(product: Product) {
     const idx = this.selectedPresentationIndex[product._id ?? ''] ?? 0;
@@ -118,7 +89,9 @@ export default class ProductComponent implements OnInit {
       this.selectedProduct?._id &&
       this.selectedProduct.presentations.length > 0 &&
       this.selectedProduct.presentations[0]._id != null &&
-      this.editStock != null
+      this.editStock != null &&
+      Number.isInteger(this.editStock) && 
+      this.editStock >= 1
     ) {
       const presentationId = this.selectedProduct.presentations[0]._id;
       const updateProductToSend = {
@@ -157,13 +130,24 @@ export default class ProductComponent implements OnInit {
     }
   }
 
-  // Actualiza productos y valor total
+  editProduct(product: Product) {
+    this.selectedProduct = product;
+    this.editStock = product.presentations[0]?.stock >= 1 
+                ? product.presentations[0].stock 
+                : 1;  // Valor por defecto mínimo[2][4]
+
+    this.modalOpenEdit = true;
+    this.cdRef.detectChanges();
+  }
+
+
   async getAllProducts(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.subscription.add(
         this.productsService.getAllProducts().subscribe({
           next: (data) => {
             this.products = data;
+            console.log("aja:", data)
             this.updateTotalInventoryValue();
             this.cdRef.detectChanges();
             resolve();
@@ -340,7 +324,7 @@ export default class ProductComponent implements OnInit {
 
     try {
       await this.createProduct(formData);
-      await this.getAllProducts();  // Espera a que termine la recarga
+      
       Swal.fire({
         icon: 'success',
         title: '¡Producto creado!',
@@ -355,14 +339,16 @@ export default class ProductComponent implements OnInit {
         title: 'Error al crear el producto',
         text: 'Ocurrió un problema. Inténtalo nuevamente.',
       });
+ 
     }
   }
 
   async createProduct(formData: FormData): Promise<any> {
-    return await this.productsService.createProduct(formData);
+    this.productsService.createProduct(formData);
+    await this.getAllProducts();
   }
 
-  // Cálculo y actualización del valor total del inventario
+
   updateTotalInventoryValue() {
     this.totalInventoryValue = this.calculateTotalInventoryValue();
     this.cdRef.detectChanges();
@@ -389,12 +375,7 @@ export default class ProductComponent implements OnInit {
     }
   }
 
-  editProduct(product: Product) {
-    this.selectedProduct = product;
-    this.editStock = product.presentations[0]?.stock ?? 0;
-    this.modalOpenEdit = true;
-    this.cdRef.detectChanges();
-  }
+  
 
   deleteProduct(product: Product) {
     if (!product._id) {

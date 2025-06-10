@@ -13,7 +13,7 @@ export default [
       },
       {
         path: 'dashboard',
-        loadComponent: () => import('./features/dashboard/dashboard'),
+        loadComponent: () => import('./features/dashboard/dashboard').then((m)=>m.default),
       },
       {
         path: 'products',
