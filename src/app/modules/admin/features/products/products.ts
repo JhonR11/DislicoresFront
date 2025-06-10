@@ -3,7 +3,7 @@ import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CreateProduct } from '../../../../shared/models/create-products.model';
-import { Product } from '../../../../shared/models/products';
+import { Category, Product } from '../../../../shared/models/products';
 import { ProductsService } from './service/products.service';
 import { Subscription } from 'rxjs';
 import { showDeleteModal } from '../../../../shared/components/detail-modal/delete-modal';
@@ -15,10 +15,11 @@ import Swal from 'sweetalert2';
   templateUrl: './products.html',
   styles: ``,
 })
+
 export default class ProductComponent implements OnInit {
+  categories: Category[] = [];
   products: Product[] = [];
   private subscription = new Subscription();
-  categories: string[] = ['destilados', 'fermentados'];
   selectedPresentationIndex: { [productId: string]: number } = {};
   modalOpenEdit = false;
   modalView = false;
@@ -58,6 +59,7 @@ export default class ProductComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.getAllCategorys();
     this.getAllProducts();
   }
 
@@ -85,12 +87,13 @@ export default class ProductComponent implements OnInit {
       this.modalOpenEdit &&
       this.selectedProduct?._id &&
       this.selectedProduct.presentations.length > 0 &&
-      this.selectedProduct.presentations[0]._id != null
+      this.selectedProduct.presentations[0]._id != null &&
+      this.editStock != null
     ) {
       const presentationId = this.selectedProduct.presentations[0]._id;
       const updateProductToSend = {
         presentationId,
-        newStock: 12,
+        newStock: this.editStock, // Usar el valor editado
       };
       this.subscription.add(
         this.productsService
@@ -112,6 +115,11 @@ export default class ProductComponent implements OnInit {
             },
             error: () => {
               console.error('Error al actualizar stock');
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo actualizar el stock. Inténtalo de nuevo.',
+              });
             },
           })
       );
@@ -124,6 +132,17 @@ export default class ProductComponent implements OnInit {
         next: (data) => {
           this.products = data;
           this.cdRef.detectChanges();
+        },
+      })
+    );
+  }
+
+  getAllCategorys(): void {
+    this.subscription.add(
+      this.productsService.getAllCategorys().subscribe({
+        next: (data) => {
+          console.log(data);
+          this.categories = data;
         },
       })
     );
@@ -245,68 +264,63 @@ export default class ProductComponent implements OnInit {
   }
 
   async onSubmit() {
-  if (!this.validateForm()) {
-    this.formError = true;
-    return;
-  }
-  this.formError = false;
-
-  const newProduct: CreateProduct = {
-    name: this.form.name.trim(),
-    description: this.form.description.trim(),
-    imageUrl: 'this.form.images.toString()', // sin comillas
-    categoryId: '6842cc9937a6a83ce4f87f36',
-    presentations: this.form.presentations.map((presentation: any) => ({
-      _id: presentation._id ?? undefined,
-      dimension: {
-        widthInCm: this.form.dimensions.width ?? 0,
-        heightInCm: this.form.dimensions.height ?? 0,
-      },
-      volumeMl: this.form.volume.single ?? 0,
-      price: this.form.price ?? 0,
-      stock: this.form.stock ?? 0,
-    })),
-  };
-
-  // Mostrar alerta de carga
-  Swal.fire({
-    title: 'Creando producto...',
-    text: 'Por favor espera',
-    allowOutsideClick: false,
-    didOpen: () => {
-      Swal.showLoading();
+    if (!this.validateForm()) {
+      this.formError = true;
+      return;
     }
-  });
+    this.formError = false;
 
-  try {
-    await this.createProduct(newProduct);
+    const newProduct: CreateProduct = {
+      name: this.form.name.trim(),
+      description: this.form.description.trim(),
+      imageUrl: 'this.form.images.toString()',
+      categoryId: this.form.category,
+      presentations: this.form.presentations.map((presentation: any) => ({
+        _id: presentation._id ?? undefined,
+        dimension: {
+          widthInCm: this.form.dimensions.width ?? 0,
+          heightInCm: this.form.dimensions.height ?? 0,
+        },
+        volumeMl: this.form.volume.single ?? 0,
+        price: this.form.price ?? 0,
+        stock: this.form.stock ?? 0,
+      })),
+    };
 
-    // Éxito
     Swal.fire({
-      icon: 'success',
-      title: '¡Producto creado!',
-      text: 'El producto se creó correctamente.',
-      timer: 2000,
-      showConfirmButton: false,
-      
+      title: 'Creando producto...',
+      text: 'Por favor espera',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
     });
-    this.closeModal();
-    this.getAllProducts();
 
-  } catch (error) {
-    // Error
-    Swal.fire({
-      icon: 'error',
-      title: 'Error al crear el producto',
-      text: 'Ocurrió un problema. Inténtalo nuevamente.',
-    });
+    try {
+      await this.createProduct(newProduct);
+
+      Swal.fire({
+        icon: 'success',
+        title: '¡Producto creado!',
+        text: 'El producto se creó correctamente.',
+        timer: 2000,
+        showConfirmButton: false,
+      });
+      this.closeModal();
+      this.getAllProducts();
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al crear el producto',
+        text: 'Ocurrió un problema. Inténtalo nuevamente.',
+      });
+    }
   }
-}
-
 
   async createProduct(newProduct: CreateProduct): Promise<void> {
-    await this.productsService.createProduct(newProduct);
-    await this.getAllProducts();
+    const r = await this.productsService.createProduct(newProduct);
+    console.log(r)
+    this.getAllProducts();
   }
 
   viewProduct(product: Product) {
@@ -327,29 +341,23 @@ export default class ProductComponent implements OnInit {
     }
     showDeleteModal(product.name, () => {
       this.subscription.add(
-      this.productsService.deleteProduct(product._id!).subscribe({
-        next: (data) => {
-          let resultado = data.statusCode
-          this.cdRef.detectChanges();
-          if(resultado==200){
-            this.getAllProducts();
-            Swal.fire(
-            'Se elimino',
-            'El producto.',
-            'success'
-
-          );
-          }else{
-            Swal.fire(
-              'No se elimino',
-              'Ocurrio un errro inesperado',
-              'error'
-            )
-          }
-        
-        },
-      })
-    );
-  });
-}
+        this.productsService.deleteProduct(product._id!).subscribe({
+          next: (data) => {
+            let resultado = data.statusCode;
+            this.cdRef.detectChanges();
+            if (resultado == 200) {
+              this.getAllProducts();
+              Swal.fire('Se elimino', 'El producto.', 'success');
+            } else {
+              Swal.fire(
+                'No se elimino',
+                'Ocurrio un error  inesperado',
+                'error'
+              );
+            }
+          },
+        })
+      );
+    });
+  }
 }

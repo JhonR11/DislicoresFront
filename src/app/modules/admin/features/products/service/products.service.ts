@@ -30,8 +30,8 @@ export class ProductsService implements CrudProductsService<Product> {
     return this.Http.post<any>(`${this.apiURL}/create`, product, {
       headers: {
         'Content-Type': 'application/json',
-        Accept: '*/*',
-        Authorization: 'Bearer '.concat(this.token!),
+        'Accept': '*/*',
+        'Authorization': 'Bearer '.concat(this.token!),
       },
     }).pipe((x) => {
       this.subscription.add(
@@ -50,12 +50,27 @@ export class ProductsService implements CrudProductsService<Product> {
     return throwError(() => new Error('Error al comunicarse con la API'));
   }
 
+  getAllCategorys(): Observable<any> {
+    return this.Http.get<any[]>(`${baseURL}categories/get-all`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': '*/*',
+        'Authorization': 'Bearer '.concat(this.token!),
+      },
+    }).pipe(
+      map((x: any) => {
+        return x.data;
+      }),
+      catchError(this.handleError)
+    );
+  }
+
   getAllProducts(): Observable<any[]> {
     return this.Http.get<any[]>(`${this.apiURL}/get-all`, {
       headers: {
         'Content-Type': 'application/json',
-        Accept: '*/*',
-        Authorization: 'Bearer '.concat(this.token!),
+        'Accept': '*/*',
+        'Authorization': 'Bearer '.concat(this.token!),
       },
     }).pipe(
       map((x: any) => {
@@ -90,8 +105,8 @@ export class ProductsService implements CrudProductsService<Product> {
       {
         headers: {
           'Content-Type': 'application/json',
-          Accept: '*/*',
-          Authorization: 'Bearer '.concat(this.token!),
+          'Accept': '*/*',
+          'Authorization': 'Bearer '.concat(this.token!),
         },
       }
     ).pipe((x) => {
@@ -102,8 +117,8 @@ export class ProductsService implements CrudProductsService<Product> {
   deleteProduct(id: string): Observable<any> {
     const headers = {
       'Content-Type': 'application/json',
-      Accept: '*/*',
-      Authorization: 'Bearer '.concat(this.token!),
+      'Accept': '*/*',
+      'Authorization': 'Bearer '.concat(this.token!),
     };
     const body = {};
     return this.Http.patch<any>(`${this.apiURL}/delete/${id}`, body, {

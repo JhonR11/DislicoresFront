@@ -98,7 +98,7 @@
   </tbody>
 </table>
 
-<!-- Modal -->
+<!-- Modal create product-->
 <div
   *ngIf="modalOpen"
   class="fixed inset-0 bg- bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50 p-4"
@@ -182,21 +182,21 @@
 
       <!-- Categori­a -->
       <label class="flex flex-col">
-        <span class="mb-2 font-semibold text-gray-700"
-          >Categoria <span class="text-red-600">*</span></span
-        >
-        <select
-          [(ngModel)]="form.category"
-          name="category"
-          required
-          class="border border-green-300 rounded-xl p-3 shadow-sm focus:outline-none focus:ring-4 focus:ring-green-300 transition"
-        >
-          <option value="" disabled>Selecciona una categoria</option>
-          <option *ngFor="let cat of categories" [value]="cat">
-            {{ cat }}
-          </option>
-        </select>
-      </label>
+  <span class="mb-2 font-semibold text-gray-700">
+    Categoria <span class="text-red-600">*</span>
+  </span>
+  <select
+    [(ngModel)]="form.category"
+    name="category"
+    required
+    class="border border-green-300 rounded-xl p-3 shadow-sm focus:outline-none focus:ring-4 focus:ring-green-300 transition"
+  >
+    <option value="" disabled>Selecciona una categoria</option>
+    <option *ngFor="let category of categories" [value]="category._id">
+      {{ category.name }}
+    </option>
+  </select>
+</label>
 
       <!-- Presentaciones -->
       <fieldset
