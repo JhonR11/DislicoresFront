@@ -36,17 +36,21 @@ export default class Dashboard implements OnInit, OnDestroy {
     );
   }
 
-  loadProducts() {
-    this.subscription.add(
-      this.productsService.getAllProducts().subscribe({
-        next: (data) => {
-          this.products = data;
-          this.tryRenderCharts();
-        },
-        error: (error) => console.error('Error al cargar productos', error),
-      })
-    );
-  }
+totalInventoryValue: number = 0;
+
+loadProducts() {
+  this.subscription.add(
+    this.productsService.getAllProducts().subscribe({
+      next: (data) => {
+        this.products = data;
+        this.totalInventoryValue = this.getTotalInventoryValue();
+        this.tryRenderCharts();
+      },
+      error: (error) => console.error('Error al cargar productos', error),
+    })
+  );
+}
+
 
   getActivePresentation(product: any) {
     return product.presentations[0]; 
