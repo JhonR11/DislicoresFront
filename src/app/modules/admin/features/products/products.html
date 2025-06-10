@@ -8,95 +8,94 @@
   </button>
 </div>
 
-<table
-  id="filter-table"
-  class="w-full text-sm text-left text-gray-500 dark:text-gray-400 border-separate border-spacing-y-2"
->
-  <thead
-    class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-300"
+  <table
+    id="filter-table"
+    class="w-full text-sm text-left text-gray-500 dark:text-gray-400 border-separate border-spacing-y-2"
   >
-    <tr>
-      <th class="px-4 py-2">Nombre</th>
-      <th class="px-4 py-2">Categoria</th>
-      <th class="px-4 py-2">Descripción</th>
-      <th class="px-4 py-2">Presentaciones</th>
-      <th class="px-4 py-2">Precio</th>
-      <th class="px-4 py-2">Dimensiones</th>
-      <th class="px-4 py-2">Stock</th>
-      <th class="px-4 py-2 text-center">Opciones</th>
-    </tr>
-  </thead>
-  <tbody *ngIf="products.length>0">
-    <tr
-      *ngFor="let product of products"
-      class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 shadow rounded"
+    <thead
+      class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-300"
     >
-      <td class="px-4 py-2 font-semibold text-gray-900 dark:text-white">
-        {{ product.name }}
-      </td>
-      <td class="px-4 py-2">{{ product.category.name }}</td>
-      <td class="px-4 py-2">{{ product.description }}</td>
+      <tr>
+        <th class="px-4 py-2">Nombre</th>
+        <th class="px-4 py-2">Categoria</th>
+        <th class="px-4 py-2">Descripción</th>
+        <th class="px-4 py-2">Presentaciones</th>
+        <th class="px-4 py-2">Precio</th>
+        <th class="px-4 py-2">Dimensiones</th>
+        <th class="px-4 py-2">Stock</th>
+        <th class="px-4 py-2 text-center">Opciones</th>
+      </tr>
+    </thead>
+    <tbody tbody *ngIf="products!==undefined && products.length>0">
+      <tr
+       *ngFor="let product of products"
+       class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 shadow rounded">
+        <td class="px-4 py-2 font-semibold text-gray-900 dark:text-white">
+          {{ product.name }}
+        </td>
+        <td class="px-4 py-2">{{ product.category.name }}</td>
+        <td class="px-4 py-2">{{ product.description }}</td>
 
-      <td class="px-4 py-2 flex items-center gap-2">
-        {{ getActivePresentation(product).volumeMl }} ml
-        <ng-container *ngIf="product.presentations.length > 1">
-          <button
-            (click)="showPrevPresentation(product)"
-            class="bg-blue-600 px-2 py-1 rounded text-xxl text-black hover:bg-blue-500"
-            title="Anterior"
-          >
-            &lt;
-          </button>
-          <button
-            (click)="showNextPresentation(product)"
-            class="bg-blue-600 px-2 py-1 rounded text-xxl text-black hover:bg-blue-500"
-            title="Siguiente"
-          >
-            &gt;
-          </button>
-          <span class="text-xs text-gray-500">
-            ({{ (selectedPresentationIndex[product?._id ?? ''] ?? 0) + 1 }}/{{
-            product.presentations.length }})
-          </span>
-        </ng-container>
-      </td>
+        <td class="px-4 py-2 flex items-center gap-2">
+          {{ getActivePresentation(product).volumeMl }} ml
+          <ng-container *ngIf="product.presentations.length > 1">
+            <button
+              (click)="showPrevPresentation(product)"
+              class="bg-blue-600 px-2 py-1 rounded text-xxl text-black hover:bg-blue-500"
+              title="Anterior"
+            >
+              &lt;
+            </button>
+            <button
+              (click)="showNextPresentation(product)"
+              class="bg-blue-600 px-2 py-1 rounded text-xxl text-black hover:bg-blue-500"
+              title="Siguiente"
+            >
+              &gt;
+            </button>
+            <span class="text-xs text-gray-500">
+              ({{ (selectedPresentationIndex[product?._id ?? ''] ?? 0) + 1 }}/{{
+              product.presentations.length }})
+            </span>
+          </ng-container>
+        </td>
 
-      <td class="px-4 py-2">
-        $ {{ getActivePresentation(product).price.toFixed(2) }}
-      </td>
+        <td class="px-4 py-2">
+          $ {{ getActivePresentation(product).price.toFixed(2) }}
+        </td>
 
-      <td class="px-4 py-2">
-        {{ getActivePresentation(product).dimension.widthInCm }} x {{
-        getActivePresentation(product).dimension.heightInCm }} cm
-      </td>
+        <td class="px-4 py-2">
+          {{ getActivePresentation(product).dimension.widthInCm }} x {{
+          getActivePresentation(product).dimension.heightInCm }} cm
+        </td>
 
-      <td class="px-4 py-2">{{ getActivePresentation(product).stock }}</td>
+        <td class="px-4 py-2">{{ getActivePresentation(product).stock }}</td>
 
-      <td class="px-4 py-2">
-        <div class="flex gap-2">
-          <button
-            (click)="viewProduct(product)"
-            class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 text-xs"
-          >
-            Ver
-          </button>
-          <button
-            (click)="editProduct(product)"
-            class="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 text-xs"
-          >
-            Modificar
-          </button>
-          <button
-            (click)="deleteProduct(product)"
-            class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 text-xs"
-          >
-            Eliminar
-          </button>
-        </div>
-      </td>
-    </tr>
-  </tbody>
-</table>
+        <td class="px-4 py-2">
+          <div class="flex gap-2">
+            <button
+              (click)="viewProduct(product)"
+              class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 text-xs"
+            >
+              Ver
+            </button>
+            <button
+              (click)="editProduct(product)"
+              class="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 text-xs"
+            >
+              Modificar
+            </button>
+            <button
+              (click)="deleteProduct(product)"
+              class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 text-xs"
+            >
+              Eliminar
+            </button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 
 <!-- Modal create product-->
 <div
@@ -123,6 +122,7 @@
           name="name"
           required
           minlength="3"
+          maxlength="30"  
           class="border border-green-300 rounded-xl p-3 shadow-sm focus:outline-none focus:ring-4 focus:ring-green-300 transition"
           #name="ngModel"
         />
@@ -153,14 +153,14 @@
           *ngIf="description.invalid && description.touched"
           class="text-red-600 text-xs mt-1"
         >
-          La descripcion es obligatoria (maximo 10 caracteres).
+          La descripcion es obligatoria (minimo 10 caracteres).
         </small>
       </label>
 
       <!-- Imagenes -->
       <label class="flex flex-col">
         <span class="mb-2 font-semibold text-gray-700"
-          >Imagenes (max 3) <span class="text-red-600">*</span></span
+          >Imagenes (max 1) <span class="text-red-600">*</span></span
         >
         <input
           type="file"
@@ -182,21 +182,21 @@
 
       <!-- Categori­a -->
       <label class="flex flex-col">
-  <span class="mb-2 font-semibold text-gray-700">
-    Categoria <span class="text-red-600">*</span>
-  </span>
-  <select
-    [(ngModel)]="form.category"
-    name="category"
-    required
-    class="border border-green-300 rounded-xl p-3 shadow-sm focus:outline-none focus:ring-4 focus:ring-green-300 transition"
-  >
-    <option value="" disabled>Selecciona una categoria</option>
-    <option *ngFor="let category of categories" [value]="category._id">
-      {{ category.name }}
-    </option>
-  </select>
-</label>
+        <span class="mb-2 font-semibold text-gray-700">
+          Categoria <span class="text-red-600">*</span>
+        </span>
+        <select
+          [(ngModel)]="form.category"
+          name="category"
+          required
+          class="border border-green-300 rounded-xl p-3 shadow-sm focus:outline-none focus:ring-4 focus:ring-green-300 transition"
+        >
+          <option value="" disabled>Selecciona una categoria</option>
+          <option *ngFor="let category of categories" [value]="category._id">
+            {{ category.name }}
+          </option>
+        </select>
+      </label>
 
       <!-- Presentaciones -->
       <fieldset
@@ -205,7 +205,7 @@
         <legend class="font-semibold text-gray-700">
           Presentaciones <span class="text-red-600">*</span>
         </legend>
-        <label class="flex items-center gap-2 cursor-pointer select-none">
+        <!-- <label class="flex items-center gap-2 cursor-pointer select-none">
           <input
             type="checkbox"
             (change)="togglePresentation('Grande')"
@@ -222,7 +222,7 @@
             class="accent-green-500 w-5 h-5"
           />
           Pequeña
-        </label>
+        </label> -->
         <label class="flex items-center gap-2 cursor-pointer select-none">
           <input
             type="checkbox"
@@ -427,93 +427,104 @@
 </div>
 
 <!-- Modal para ver -->
+<div
+  *ngIf="modalView === true"
+  class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+>
   <div
-    *ngIf="modalView === true"
-    class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+    class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-2 transform transition-all duration-300 scale-100 overflow-hidden"
   >
     <div
-      class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-2 transform transition-all duration-300 scale-100 overflow-hidden"
+      class="max-h-[85vh] overflow-y-auto scrollbar-thin scrollbar-thumb-indigo-400 scrollbar-track-transparent px-4 pt-4 pb-6"
     >
-      <div
-        class="max-h-[85vh] overflow-y-auto scrollbar-thin scrollbar-thumb-indigo-400 scrollbar-track-transparent px-4 pt-4 pb-6"
-      >
-        <!-- Header con botón de cerrar -->
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-2xl font-semibold text-gray-800 text-center flex-1">
-            {{ selectedProduct?.name }}
-          </h2>
-          <button
-            (click)="closeModal()"
-            class="ml-4 p-1 rounded-full hover:bg-gray-100 transition-colors duration-200"
-            type="button"
+      <!-- Header con botón de cerrar -->
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-semibold text-gray-800 text-center flex-1">
+          {{ selectedProduct?.name }}
+        </h2>
+        <button
+          (click)="closeModal()"
+          class="ml-4 p-1 rounded-full hover:bg-gray-100 transition-colors duration-200"
+          type="button"
+        >
+          <svg
+            class="w-5 h-5 text-gray-500 hover:text-gray-700"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
           >
-            <svg
-              class="w-5 h-5 text-gray-500 hover:text-gray-700"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              ></path>
-            </svg>
-          </button>
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            ></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Imagen destacada (opcional, si deseas una sola imagen) -->
+      <div class="rounded-xl overflow-hidden mb-4 shadow">
+    <ng-container *ngIf="selectedProduct?.imageUrl && selectedProduct?.imageUrl; else defaultImage">
+      <img
+        [src]="selectedProduct?.imageUrl"
+        class="w-full h-48 object-cover"
+        [alt]="selectedProduct?.name"
+      />
+    </ng-container>
+
+  <ng-template #defaultImage>
+    <img
+      src="https://www.bodega-latina.de/wp-content/uploads/2023/01/cerveza-mexicana-modelo.jpg"
+      alt="Imagen por defecto"
+      class="w-full h-48 object-cover"
+    />
+  </ng-template>
+      </div>
+
+
+
+      <!-- Descripción -->
+      <p class="text-sm text-gray-600 mb-6 text-center leading-relaxed">
+        {{ selectedProduct?.description }}
+      </p>
+
+      <!-- Detalles -->
+      <div class="space-y-4 text-sm text-gray-700">
+        <div class="flex justify-between items-center">
+          <span class="font-medium">Categoría:</span>
+          <span>{{ selectedProduct?.category?.name }}</span>
         </div>
-
-        <!-- Imagen destacada (opcional, si deseas una sola imagen) -->
-        <div class="rounded-xl overflow-hidden mb-4 shadow">
-          <img
-            *ngIf="selectedProduct?.imageUrl?.[0]"
-            [src]="selectedProduct?.imageUrl"
-            class="w-full h-48 object-cover"
-            [alt]="selectedProduct?.name"
-          />
-        </div>
-
-        <!-- Descripción -->
-        <p class="text-sm text-gray-600 mb-6 text-center leading-relaxed">
-          {{ selectedProduct?.description }}
-        </p>
-
-        <!-- Detalles -->
-        <div class="space-y-4 text-sm text-gray-700">
-          <div class="flex justify-between items-center">
-            <span class="font-medium">Categoría:</span>
-            <span>{{ selectedProduct?.category?.name }}</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="font-medium">Stock disponible:</span>
-            <span
-              >{{
-              selectedProduct?.presentations?.[selectedPresentationIndex[selectedProduct?._id
-              || '']]?.stock }} unidades</span
-            >
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="font-medium">Presentación:</span>
-            <span
-              >{{
-              selectedProduct?.presentations?.[selectedPresentationIndex[selectedProduct?._id
-              || '']]?.volumeMl }} ml</span
-            >
-          </div>
-        </div>
-
-        <!-- Botón de cerrar -->
-        <div class="pt-6">
-          <button
-            (click)="closeModal()"
-            class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition"
+        <div class="flex justify-between items-center">
+          <span class="font-medium">Stock disponible:</span>
+          <span
+            >{{
+            selectedProduct?.presentations?.[selectedPresentationIndex[selectedProduct?._id
+            || '']]?.stock }} unidades</span
           >
-            Cerrar
-          </button>
         </div>
+        <div class="flex justify-between items-center">
+          <span class="font-medium">Presentación:</span>
+          <span
+            >{{
+            selectedProduct?.presentations?.[selectedPresentationIndex[selectedProduct?._id
+            || '']]?.volumeMl }} ml</span
+          >
+        </div>
+      </div>
+
+      <!-- Botón de cerrar -->
+      <div class="pt-6">
+        <button
+          (click)="closeModal()"
+          class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition"
+        >
+          Cerrar
+        </button>
       </div>
     </div>
   </div>
+</div>
 
 <!-- Borrar -->
 <div

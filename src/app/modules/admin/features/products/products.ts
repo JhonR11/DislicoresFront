@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { CreateProduct } from '../../../../shared/models/create-products.model';
+import { ActivatedRoute } from '@angular/router';
 import { Category, Product } from '../../../../shared/models/products';
 import { ProductsService } from './service/products.service';
 import { Subscription } from 'rxjs';
@@ -15,11 +14,11 @@ import Swal from 'sweetalert2';
   templateUrl: './products.html',
   styles: ``,
 })
-
 export default class ProductComponent implements OnInit {
   categories: Category[] = [];
   products: Product[] = [];
   private subscription = new Subscription();
+  selectedFile: File | null = null;
   selectedPresentationIndex: { [productId: string]: number } = {};
   modalOpenEdit = false;
   modalView = false;
@@ -31,6 +30,13 @@ export default class ProductComponent implements OnInit {
     default: false,
     checked: true,
   };
+
+  // Paginación
+  currentPage = 1;
+  itemsPerPage = 5;
+
+  // Valor total inventario
+  totalInventoryValue = 0;
 
   form = {
     name: '',
@@ -50,7 +56,6 @@ export default class ProductComponent implements OnInit {
 
   constructor(
     private cdRef: ChangeDetectorRef,
-
     private route: ActivatedRoute,
     private productsService: ProductsService
   ) {
@@ -61,6 +66,31 @@ export default class ProductComponent implements OnInit {
   ngOnInit() {
     this.getAllCategorys();
     this.getAllProducts();
+  }
+
+  // Paginación
+  get pagedProducts() {
+    if (!this.products) return [];
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    return this.products.slice(startIndex, startIndex + this.itemsPerPage);
+  }
+
+  get totalPages() {
+    return Math.ceil((this.products?.length || 0) / this.itemsPerPage);
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
+  }
+
+  nextPage() {
+    this.goToPage(this.currentPage + 1);
+  }
+
+  prevPage() {
+    this.goToPage(this.currentPage - 1);
   }
 
   getActivePresentation(product: Product) {
@@ -93,7 +123,7 @@ export default class ProductComponent implements OnInit {
       const presentationId = this.selectedProduct.presentations[0]._id;
       const updateProductToSend = {
         presentationId,
-        newStock: this.editStock, // Usar el valor editado
+        newStock: this.editStock,
       };
       this.subscription.add(
         this.productsService
@@ -101,6 +131,7 @@ export default class ProductComponent implements OnInit {
           .subscribe({
             next: (data) => {
               this.products = data;
+              this.updateTotalInventoryValue();
               Swal.fire({
                 icon: 'success',
                 title: 'Stock actualizado',
@@ -126,22 +157,27 @@ export default class ProductComponent implements OnInit {
     }
   }
 
-  getAllProducts(): void {
-    this.subscription.add(
-      this.productsService.getAllProducts().subscribe({
-        next: (data) => {
-          this.products = data;
-          this.cdRef.detectChanges();
-        },
-      })
-    );
+  // Actualiza productos y valor total
+  async getAllProducts(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.subscription.add(
+        this.productsService.getAllProducts().subscribe({
+          next: (data) => {
+            this.products = data;
+            this.updateTotalInventoryValue();
+            this.cdRef.detectChanges();
+            resolve();
+          },
+          error: (err) => reject(err)
+        })
+      );
+    });
   }
 
   getAllCategorys(): void {
     this.subscription.add(
       this.productsService.getAllCategorys().subscribe({
         next: (data) => {
-          console.log(data);
           this.categories = data;
         },
       })
@@ -163,6 +199,7 @@ export default class ProductComponent implements OnInit {
     this.resetForm();
     this.modalOpen = true;
     this.formError = false;
+    this.cdRef.detectChanges();
   }
 
   closeModal() {
@@ -171,6 +208,7 @@ export default class ProductComponent implements OnInit {
     this.modalView = false;
     this.selectedProduct = null;
     this.editStock = null;
+    this.cdRef.detectChanges();
   }
 
   closeModalEdit() {
@@ -196,18 +234,18 @@ export default class ProductComponent implements OnInit {
 
   onImageChange(event: any) {
     const files = event.target.files;
-    if (files.length + this.form.images.length > 3) {
-      alert('Solo puedes añadir hasta 3 imágenes.');
+    if (files.length + this.form.images.length > 1) {
+      alert('Solo puedes añadir hasta 1 imágenes.');
       return;
     }
-
-    for (let i = 0; i < files.length && this.form.images.length < 3; i++) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.form.images.push(reader.result);
-      };
-      reader.readAsDataURL(files[i]);
+    if (files.length > 0) {
+      this.selectedFile = files[0];
     }
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.form.images = [reader.result];
+    };
+    if (this.selectedFile) reader.readAsDataURL(this.selectedFile);
   }
 
   validateForm(): boolean {
@@ -270,22 +308,26 @@ export default class ProductComponent implements OnInit {
     }
     this.formError = false;
 
-    const newProduct: CreateProduct = {
-      name: this.form.name.trim(),
-      description: this.form.description.trim(),
-      imageUrl: 'this.form.images.toString()',
-      categoryId: this.form.category,
-      presentations: this.form.presentations.map((presentation: any) => ({
-        _id: presentation._id ?? undefined,
-        dimension: {
-          widthInCm: this.form.dimensions.width ?? 0,
-          heightInCm: this.form.dimensions.height ?? 0,
-        },
-        volumeMl: this.form.volume.single ?? 0,
-        price: this.form.price ?? 0,
-        stock: this.form.stock ?? 0,
-      })),
-    };
+    const formData = new FormData();
+
+    formData.append('name', this.form.name.trim());
+    formData.append('description', this.form.description.trim());
+    formData.append('categoryId', this.form.category);
+
+    formData.append('presentations', JSON.stringify(this.form.presentations.map((presentation: any) => ({
+      _id: presentation._id ?? undefined,
+      dimension: {
+        widthInCm: this.form.dimensions.width ?? 0,
+        heightInCm: this.form.dimensions.height ?? 0,
+      },
+      volumeMl: this.form.volume.single ?? 0,
+      price: this.form.price ?? 0,
+      stock: this.form.stock ?? 0,
+    }))));
+
+    if (this.selectedFile) {
+      formData.append('image', this.selectedFile, this.selectedFile.name);
+    }
 
     Swal.fire({
       title: 'Creando producto...',
@@ -297,8 +339,8 @@ export default class ProductComponent implements OnInit {
     });
 
     try {
-      await this.createProduct(newProduct);
-
+      await this.createProduct(formData);
+      await this.getAllProducts();  // Espera a que termine la recarga
       Swal.fire({
         icon: 'success',
         title: '¡Producto creado!',
@@ -307,7 +349,6 @@ export default class ProductComponent implements OnInit {
         showConfirmButton: false,
       });
       this.closeModal();
-      this.getAllProducts();
     } catch (error) {
       Swal.fire({
         icon: 'error',
@@ -317,21 +358,42 @@ export default class ProductComponent implements OnInit {
     }
   }
 
-  async createProduct(newProduct: CreateProduct): Promise<void> {
-    const r = await this.productsService.createProduct(newProduct);
-    console.log(r)
-    this.getAllProducts();
+  async createProduct(formData: FormData): Promise<any> {
+    return await this.productsService.createProduct(formData);
+  }
+
+  // Cálculo y actualización del valor total del inventario
+  updateTotalInventoryValue() {
+    this.totalInventoryValue = this.calculateTotalInventoryValue();
+    this.cdRef.detectChanges();
+  }
+
+  calculateTotalInventoryValue(): number {
+    if (!this.products || this.products.length === 0) return 0;
+    return this.products.reduce((total, product) => {
+      const presentation = this.getActivePresentation(product);
+      if (!presentation) return total;
+      return total + (presentation.price * presentation.stock);
+    }, 0);
   }
 
   viewProduct(product: Product) {
     this.modalView = true;
-    this.selectedProduct = this.products[0];
+    if (!product._id) {
+      console.error('El producto no tiene un _id definido.');
+      return;
+    }
+    this.selectedProduct = product;
+    if (!(product._id in this.selectedPresentationIndex)) {
+      this.selectedPresentationIndex[product._id] = 0;
+    }
   }
 
   editProduct(product: Product) {
     this.selectedProduct = product;
     this.editStock = product.presentations[0]?.stock ?? 0;
     this.modalOpenEdit = true;
+    this.cdRef.detectChanges();
   }
 
   deleteProduct(product: Product) {
@@ -344,14 +406,13 @@ export default class ProductComponent implements OnInit {
         this.productsService.deleteProduct(product._id!).subscribe({
           next: (data) => {
             let resultado = data.statusCode;
-            this.cdRef.detectChanges();
             if (resultado == 200) {
-              this.getAllProducts();
+              this.getAllProducts().then(() => this.updateTotalInventoryValue());
               Swal.fire('Se elimino', 'El producto.', 'success');
             } else {
               Swal.fire(
                 'No se elimino',
-                'Ocurrio un error  inesperado',
+                'Ocurrio un error inesperado',
                 'error'
               );
             }

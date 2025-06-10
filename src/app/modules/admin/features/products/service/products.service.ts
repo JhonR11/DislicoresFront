@@ -25,26 +25,31 @@ export class ProductsService implements CrudProductsService<Product> {
     this.token = localStorage.getItem('accessToken');
   }
 
-  //hay que validar despues la nulabilidad despues del token globalmente en esta clase
-  async createProduct(product: CreateProduct): Promise<any> {
-    return this.Http.post<any>(`${this.apiURL}/create`, product, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': '*/*',
-        'Authorization': 'Bearer '.concat(this.token!),
-      },
-    }).pipe((x) => {
+ 
+ async createProduct(product: FormData): Promise<any> {
+  return this.Http.post<any>(`${this.apiURL}/create`, product, {
+    headers: {
+      // No pongas 'Content-Type', Angular lo asigna automáticamente para FormData
+      'Accept': '*/*',
+      'Authorization': 'Bearer '.concat(this.token!),
+    },
+  }).pipe(
+    x => {
       this.subscription.add(
         x.subscribe({
           next: (data) => {
-    
+            // Manejo opcional de respuesta
           },
         })
       );
-
       return x;
-    }, catchError(this.handleError));
-  }
+    },
+    catchError(this.handleError)
+  );
+}
+
+
+
   private handleError(error: any): Observable<never> {
     console.error('Error en API:', error);
     return throwError(() => new Error('Error al comunicarse con la API'));
