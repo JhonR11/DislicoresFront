@@ -63,7 +63,6 @@ export default class ProductComponent implements OnInit {
     this.getAllProducts();
   }
 
-
   getActivePresentation(product: Product) {
     const idx = this.selectedPresentationIndex[product._id ?? ''] ?? 0;
     return product.presentations[idx];
@@ -90,13 +89,13 @@ export default class ProductComponent implements OnInit {
       this.selectedProduct.presentations.length > 0 &&
       this.selectedProduct.presentations[0]._id != null &&
       this.editStock != null &&
-      Number.isInteger(this.editStock) && 
+      Number.isInteger(this.editStock) &&
       this.editStock >= 1
     ) {
       const presentationId = this.selectedProduct.presentations[0]._id;
       const updateProductToSend = {
         presentationId,
-        newStock: this.editStock,
+        stock: this.editStock,
       };
       this.subscription.add(
         this.productsService
@@ -104,7 +103,7 @@ export default class ProductComponent implements OnInit {
           .subscribe({
             next: (data) => {
               this.products = data;
-              this.updateTotalInventoryValue();
+
               Swal.fire({
                 icon: 'success',
                 title: 'Stock actualizado',
@@ -132,14 +131,12 @@ export default class ProductComponent implements OnInit {
 
   editProduct(product: Product) {
     this.selectedProduct = product;
-    this.editStock = product.presentations[0]?.stock >= 1 
-                ? product.presentations[0].stock 
-                : 1;  // Valor por defecto mínimo[2][4]
+    this.editStock =
+      product.presentations[0]?.stock >= 1 ? product.presentations[0].stock : 1;
 
     this.modalOpenEdit = true;
     this.cdRef.detectChanges();
   }
-
 
   async getAllProducts(): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -147,15 +144,28 @@ export default class ProductComponent implements OnInit {
         this.productsService.getAllProducts().subscribe({
           next: (data) => {
             this.products = data;
-            console.log("aja:", data)
-            this.updateTotalInventoryValue();
+            console.log('aja:', data);
+
             this.cdRef.detectChanges();
             resolve();
           },
-          error: (err) => reject(err)
+          error: (err) => reject(err),
         })
       );
     });
+  }
+  updateTotalInventoryValue() {
+    this.totalInventoryValue = this.calculateTotalInventoryValue();
+    this.cdRef.detectChanges();
+  }
+
+  calculateTotalInventoryValue(): number {
+    if (!this.products || this.products.length === 0) return 0;
+    return this.products.reduce((total, product) => {
+      const presentation = this.getActivePresentation(product);
+      if (!presentation) return total;
+      return total + presentation.price * presentation.stock;
+    }, 0);
   }
 
   getAllCategorys(): void {
@@ -163,6 +173,7 @@ export default class ProductComponent implements OnInit {
       this.productsService.getAllCategorys().subscribe({
         next: (data) => {
           this.categories = data;
+          this.cdRef.detectChanges();
         },
       })
     );
@@ -188,10 +199,7 @@ export default class ProductComponent implements OnInit {
 
   closeModal() {
     this.modalOpen = false;
-    this.modalOpenEdit = false;
     this.modalView = false;
-    this.selectedProduct = null;
-    this.editStock = null;
     this.cdRef.detectChanges();
   }
 
@@ -199,7 +207,6 @@ export default class ProductComponent implements OnInit {
     this.modalOpenEdit = false;
     this.selectedProduct = null;
     this.editStock = null;
-    this.cdRef.detectChanges();
   }
 
   resetForm() {
@@ -298,16 +305,21 @@ export default class ProductComponent implements OnInit {
     formData.append('description', this.form.description.trim());
     formData.append('categoryId', this.form.category);
 
-    formData.append('presentations', JSON.stringify(this.form.presentations.map((presentation: any) => ({
-      _id: presentation._id ?? undefined,
-      dimension: {
-        widthInCm: this.form.dimensions.width ?? 0,
-        heightInCm: this.form.dimensions.height ?? 0,
-      },
-      volumeMl: this.form.volume.single ?? 0,
-      price: this.form.price ?? 0,
-      stock: this.form.stock ?? 0,
-    }))));
+    formData.append(
+      'presentations',
+      JSON.stringify(
+        this.form.presentations.map((presentation: any) => ({
+          _id: presentation._id ?? undefined,
+          dimension: {
+            widthInCm: this.form.dimensions.width ?? 0,
+            heightInCm: this.form.dimensions.height ?? 0,
+          },
+          volumeMl: this.form.volume.single ?? 0,
+          price: this.form.price ?? 0,
+          stock: this.form.stock ?? 0,
+        }))
+      )
+    );
 
     if (this.selectedFile) {
       formData.append('image', this.selectedFile, this.selectedFile.name);
@@ -324,7 +336,7 @@ export default class ProductComponent implements OnInit {
 
     try {
       await this.createProduct(formData);
-      
+      this.getAllCategorys();
       Swal.fire({
         icon: 'success',
         title: '¡Producto creado!',
@@ -339,28 +351,19 @@ export default class ProductComponent implements OnInit {
         title: 'Error al crear el producto',
         text: 'Ocurrió un problema. Inténtalo nuevamente.',
       });
- 
     }
   }
 
-  async createProduct(formData: FormData): Promise<any> {
-    this.productsService.createProduct(formData);
-    await this.getAllProducts();
-  }
-
-
-  updateTotalInventoryValue() {
-    this.totalInventoryValue = this.calculateTotalInventoryValue();
-    this.cdRef.detectChanges();
-  }
-
-  calculateTotalInventoryValue(): number {
-    if (!this.products || this.products.length === 0) return 0;
-    return this.products.reduce((total, product) => {
-      const presentation = this.getActivePresentation(product);
-      if (!presentation) return total;
-      return total + (presentation.price * presentation.stock);
-    }, 0);
+  createProduct(formData: FormData): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.productsService.createProduct(formData).subscribe({
+        next: () => {
+          this.getAllProducts(); // Actualiza la lista tras crear
+          resolve();
+        },
+        error: (err) => reject(err),
+      });
+    });
   }
 
   viewProduct(product: Product) {
@@ -375,8 +378,6 @@ export default class ProductComponent implements OnInit {
     }
   }
 
-  
-
   deleteProduct(product: Product) {
     if (!product._id) {
       console.error('El producto no tiene un _id definido.');
@@ -388,7 +389,7 @@ export default class ProductComponent implements OnInit {
           next: (data) => {
             let resultado = data.statusCode;
             if (resultado == 200) {
-              this.getAllProducts().then(() => this.updateTotalInventoryValue());
+              this.getAllProducts();
               Swal.fire('Se elimino', 'El producto.', 'success');
             } else {
               Swal.fire(

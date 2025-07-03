@@ -26,28 +26,16 @@ export class ProductsService implements CrudProductsService<Product> {
   }
 
  
- async createProduct(product: FormData): Promise<any> {
-  return this.Http.post<any>(`${this.apiURL}/create`, product, {
-    headers: {
-      // No pongas 'Content-Type', Angular lo asigna automáticamente para FormData
-      'Accept': '*/*',
-      'Authorization': 'Bearer '.concat(this.token!),
-    },
-  }).pipe(
-    x => {
-      this.subscription.add(
-        x.subscribe({
-          next: (data) => {
-            // Manejo opcional de respuesta
-          },
-        })
-      );
-      return x;
-    },
-    catchError(this.handleError)
-  );
-}
-
+  createProduct(product: FormData): Observable<any> {
+    return this.Http.post<any>(`${this.apiURL}/create`, product, {
+      headers: {
+        'Accept': '*/*',
+        'Authorization': 'Bearer '.concat(this.token!),
+      },
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
 
 
   private handleError(error: any): Observable<never> {
@@ -102,11 +90,15 @@ export class ProductsService implements CrudProductsService<Product> {
 
   updateProduct(
     productId: string,
-    updateProduct: { presentationId: string; newStock: number }
+    updateProduct: { presentationId: string; stock: number }
   ): Observable<any> {
+    console.log(productId)
+    console.log(updateProduct)
     return this.Http.patch<any[]>(
       `${this.apiURL}/update-stock/${productId}`,
       updateProduct,
+      
+      
       {
         headers: {
           'Content-Type': 'application/json',

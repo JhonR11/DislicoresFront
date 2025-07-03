@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ProductsService } from '../products/service/products.service'; // Ajusta la ruta
 import ApexCharts from 'apexcharts';
@@ -17,7 +17,7 @@ export default class Dashboard implements OnInit, OnDestroy {
   stockByCategoryChart: ApexCharts | null = null;
   inventoryDistributionChart: ApexCharts | null = null;
 
-  constructor(private productsService: ProductsService) {}
+  constructor(private productsService: ProductsService, private cdRef: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.loadCategories();
@@ -36,17 +36,22 @@ export default class Dashboard implements OnInit, OnDestroy {
     );
   }
 
-  loadProducts() {
-    this.subscription.add(
-      this.productsService.getAllProducts().subscribe({
-        next: (data) => {
-          this.products = data;
-          this.tryRenderCharts();
-        },
-        error: (error) => console.error('Error al cargar productos', error),
-      })
-    );
-  }
+totalInventoryValue: number = 0;
+
+loadProducts() {
+  this.subscription.add(
+    this.productsService.getAllProducts().subscribe({
+      next: (data) => {
+        this.products = data;
+        this.totalInventoryValue = this.getTotalInventoryValue(); // Aquí
+        this.cdRef.detectChanges();
+        this.tryRenderCharts();
+      },
+      error: (error) => console.error('Error al cargar productos', error),
+    })
+  );
+}
+
 
   getActivePresentation(product: any) {
     return product.presentations[0]; 
