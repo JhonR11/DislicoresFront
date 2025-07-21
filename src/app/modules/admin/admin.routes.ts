@@ -1,5 +1,4 @@
-import { Routes } from '@angular/router';
-import { Auth } from '../auth/service/auth';
+import { Routes } from '@angular/router'; 
 
 export default [
   {
@@ -13,15 +12,18 @@ export default [
       },
       {
         path: 'dashboard',
-        loadComponent: () => import('./features/dashboard/dashboard').then((m)=>m.default),
+        loadComponent: () => import('./features/dashboard/dashboard'),
       },
       {
         path: 'products',
-        loadComponent: () => import('./features/products/products').then((m)=>m.default),
+        loadComponent: () => import('./features/products/products'),
       },
       {
-        path: 'noti',
-        loadComponent: () => import('./features/notificaciones/notificaciones')
+        path: 'users',
+        loadComponent: () => import('./features/create-users/create-users'),
+      },{
+        path: 'sales',
+        loadComponent: () => import('./features/create-sale/create-sale'),
       },
       {
         path: '**',

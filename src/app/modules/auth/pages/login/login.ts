@@ -69,9 +69,8 @@ export default class Login {
     setTimeout(() => {
       this.error = '';
       this.success = '';
-    }, 2000);
+    }, 200);
   }
-
   validateEmail(email: string): boolean {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);

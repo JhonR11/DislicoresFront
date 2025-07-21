@@ -1,9 +1,7 @@
 <!-- Tabla de Productos -->
 <div class="">
   <button
-    (click)="openModal()"
-    class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-  >
+    (click)="openModal()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
     Añadir Producto
   </button>
 </div>
@@ -69,7 +67,7 @@
           getActivePresentation(product).dimension.heightInCm }} cm
         </td>
 
-        <td class="px-4 py-2">{{ getActivePresentation(product).stock }}</td>
+        <td class="px-4 py-2">{{ getActivePresentation(product).stock }} unidades</td>
 
         <td class="px-4 py-2">
           <div class="flex gap-2">
